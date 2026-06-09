@@ -11,7 +11,7 @@ export function Logo({
 }) {
   return (
     <div className={cn("flex items-center gap-2.5", className)}>
-      <div className="grid h-9 w-9 place-items-center rounded-lg bg-gradient-to-br from-primary to-emerald-600 text-primary-foreground shadow-sm ring-1 ring-white/10">
+      <div className="grid h-9 w-9 place-items-center rounded-lg bg-gradient-to-br from-emerald-400 to-emerald-600 text-white shadow-sm ring-1 ring-white/10">
         <ChefHat className="h-5 w-5" strokeWidth={2.25} />
       </div>
       {!compact && (

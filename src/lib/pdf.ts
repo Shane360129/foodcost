@@ -52,17 +52,18 @@ function esc(s: string): string {
   );
 }
 
+// Earth-tone palette (matches the app's light theme).
 const C = {
-  text: "#0f172a",
-  muted: "#64748b",
-  border: "#e2e8f0",
-  accent: "#047857",
-  accentSoft: "#ecfdf5",
-  flagBg: "#fef2f2",
-  danger: "#b91c1c",
-  warning: "#b45309",
-  success: "#047857",
-  zebra: "#f8fafc",
+  text: "#2a2018",
+  muted: "#857567",
+  border: "#e7ddcf",
+  accent: "#b1542f",
+  accentSoft: "#f6efe4",
+  flagBg: "#f7e7e0",
+  danger: "#a3341f",
+  warning: "#9a6312",
+  success: "#566b27",
+  zebra: "#faf6ef",
 };
 
 function buildReportHtml(input: ReportInput): string {

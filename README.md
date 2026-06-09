@@ -43,6 +43,10 @@
 | :--: | :--: |
 | ![Operations](docs/screenshot-operations.png) | ![Suppliers](docs/screenshot-suppliers.png) |
 
+| 大地色系淺色主題 Earth-tone light theme |
+| :--: |
+| ![Light theme](docs/screenshot-light.png) |
+
 ---
 
 ## ✨ 核心功能 Features
@@ -59,7 +63,7 @@
 - **進銷控管 Operations** — 逐筆記錄**每日進貨**（日期 · 廠商 · 品項 · 金額）與**當日營業額**；月報表自動算出**進貨成本率**、估算毛利、營收／進貨趨勢圖與各廠商進貨佔比。
 - **匯出 PDF** — A4 菜單成本報表，含 LOGO 區、表頭、表格與頁尾，給合夥人或主廚看。
 - **本地儲存 + 備份** — 全部資料存在瀏覽器的 **IndexedDB**（透過 Dexie）；可匯出／匯入 **JSON 備份**，換電腦不會丟資料。
-- **體驗 UX** — SaaS 工具感、數字 `tabular-nums` 對齊、**預設深色模式**、**中／英雙語切換**、桌面優先但行動裝置可用、**PWA 可離線**。
+- **體驗 UX** — SaaS 工具感、數字 `tabular-nums` 對齊、**預設深色模式（另有大地色系淺色主題：赤陶 × 橄欖 × 沙色）**、**中／英雙語切換**、桌面優先但行動裝置可用、**PWA 可離線**。
 
 ---
 
