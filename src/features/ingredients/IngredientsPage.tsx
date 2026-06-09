@@ -24,7 +24,13 @@ import { PageHeader } from "@/components/common/PageHeader";
 import { EmptyState } from "@/components/common/EmptyState";
 import { ConfirmDialog } from "@/components/common/ConfirmDialog";
 import { IngredientForm } from "./IngredientForm";
-import { useIngredients, useIngredientUsage, useMenus } from "@/hooks/useData";
+import {
+  useIngredients,
+  useIngredientUsage,
+  useMenus,
+  useSupplierMap,
+  useSuppliers,
+} from "@/hooks/useData";
 import { deleteIngredient } from "@/lib/db";
 import { loadSeedData } from "@/lib/seed";
 import { categoryLabel } from "@/lib/categories";
@@ -38,6 +44,8 @@ export function IngredientsPage() {
   const { t, lang, currency } = useSettings();
   const ingredients = useIngredients();
   const menus = useMenus();
+  const suppliers = useSuppliers();
+  const supplierMap = useSupplierMap(suppliers);
   const usage = useIngredientUsage(menus);
 
   const [query, setQuery] = useState("");
@@ -168,7 +176,7 @@ export function IngredientsPage() {
                 <TableHead>{t("common.category")}</TableHead>
                 <TableHead>{t("common.unit")}</TableHead>
                 <TableHead className="text-right">{t("common.unitCost")}</TableHead>
-                <TableHead>{t("common.supplier")}</TableHead>
+                <TableHead>{t("ing.supplier")}</TableHead>
                 <TableHead className="w-[88px] text-right">
                   {t("common.actions")}
                 </TableHead>
@@ -207,8 +215,20 @@ export function IngredientsPage() {
                     <TableCell className="tnum text-right font-medium">
                       {formatCurrency(ing.unitCost, currency)}
                     </TableCell>
-                    <TableCell className="max-w-[220px] truncate text-sm text-muted-foreground">
-                      {ing.supplier || "—"}
+                    <TableCell className="max-w-[220px] text-sm">
+                      {ing.supplierId != null &&
+                      supplierMap.get(ing.supplierId) ? (
+                        <div className="truncate font-medium text-foreground">
+                          {supplierMap.get(ing.supplierId)!.name}
+                        </div>
+                      ) : (
+                        <span className="text-muted-foreground">—</span>
+                      )}
+                      {ing.supplier && (
+                        <div className="truncate text-xs text-muted-foreground">
+                          {ing.supplier}
+                        </div>
+                      )}
                     </TableCell>
                     <TableCell>
                       <div className="flex justify-end gap-1">

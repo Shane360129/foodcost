@@ -23,6 +23,7 @@ import {
 import { Field } from "@/components/common/Field";
 import { createIngredient, updateIngredient } from "@/lib/db";
 import { INGREDIENT_CATEGORIES, categoryLabel } from "@/lib/categories";
+import { useSuppliers } from "@/hooks/useData";
 import { useSettings } from "@/lib/settings";
 import { UNITS, type Ingredient, type Unit } from "@/types";
 
@@ -34,6 +35,7 @@ const schema = z.object({
   unit: z.enum(["g", "ml", "piece", "portion"]),
   unitCost: z.coerce.number().min(0).finite(),
   category: z.string().optional(),
+  supplierId: z.string().optional(),
   supplier: z.string().trim().optional(),
 });
 
@@ -49,6 +51,7 @@ export function IngredientForm({
   editing?: Ingredient | null;
 }) {
   const { t } = useSettings();
+  const suppliers = useSuppliers();
   const {
     register,
     handleSubmit,
@@ -64,6 +67,7 @@ export function IngredientForm({
       unit: "g",
       unitCost: 0,
       category: NONE,
+      supplierId: NONE,
       supplier: "",
     },
   });
@@ -76,6 +80,7 @@ export function IngredientForm({
       unit: editing?.unit ?? "g",
       unitCost: editing?.unitCost ?? 0,
       category: editing?.category ?? NONE,
+      supplierId: editing?.supplierId != null ? String(editing.supplierId) : NONE,
       supplier: editing?.supplier ?? "",
     });
   }, [open, editing, reset]);
@@ -89,6 +94,10 @@ export function IngredientForm({
       unit: values.unit,
       unitCost: Number(values.unitCost) || 0,
       category: values.category === NONE ? undefined : values.category,
+      supplierId:
+        values.supplierId && values.supplierId !== NONE
+          ? Number(values.supplierId)
+          : undefined,
       supplier: values.supplier?.trim() || undefined,
     };
     if (editing?.id != null) {
@@ -167,29 +176,61 @@ export function IngredientForm({
             </Field>
           </div>
 
-          <Field label={t("common.category")}>
-            <Controller
-              control={control}
-              name="category"
-              render={({ field }) => (
-                <Select value={field.value || NONE} onValueChange={field.onChange}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value={NONE}>{t("cat.uncategorized")}</SelectItem>
-                    {INGREDIENT_CATEGORIES.map((c) => (
-                      <SelectItem key={c} value={c}>
-                        {categoryLabel(c, t)}
+          <div className="grid grid-cols-2 gap-3">
+            <Field label={t("common.category")}>
+              <Controller
+                control={control}
+                name="category"
+                render={({ field }) => (
+                  <Select
+                    value={field.value || NONE}
+                    onValueChange={field.onChange}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={NONE}>
+                        {t("cat.uncategorized")}
                       </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
-            />
-          </Field>
+                      {INGREDIENT_CATEGORIES.map((c) => (
+                        <SelectItem key={c} value={c}>
+                          {categoryLabel(c, t)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+            </Field>
 
-          <Field label={t("common.supplier")} htmlFor="ing-supplier">
+            <Field label={t("ing.supplier")}>
+              <Controller
+                control={control}
+                name="supplierId"
+                render={({ field }) => (
+                  <Select
+                    value={field.value || NONE}
+                    onValueChange={field.onChange}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={NONE}>{t("ing.noSupplier")}</SelectItem>
+                      {(suppliers ?? []).map((s) => (
+                        <SelectItem key={s.id} value={String(s.id)}>
+                          {s.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+            </Field>
+          </div>
+
+          <Field label={t("ing.purchaseNote")} htmlFor="ing-supplier">
             <Textarea
               id="ing-supplier"
               rows={2}

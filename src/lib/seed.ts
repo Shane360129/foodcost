@@ -1,5 +1,6 @@
 import type { Unit } from "@/types";
 import { db } from "@/lib/db";
+import { toISODate } from "@/lib/dates";
 
 export interface SeedIngredient {
   key: string;
@@ -11,6 +12,31 @@ export interface SeedIngredient {
   category: string;
   supplier?: string;
 }
+
+export interface SeedSupplier {
+  key: string;
+  name: string;
+  contact?: string;
+  phone?: string;
+  note?: string;
+}
+
+export const SEED_SUPPLIERS: SeedSupplier[] = [
+  { key: "sup_market", name: "濱江市場", contact: "林小姐", phone: "02-2502-1234", note: "蔬果，每日清晨配送" },
+  { key: "sup_meat", name: "元大肉品", contact: "陳大哥", phone: "02-2761-5678", note: "牛豬雞，週一三五到貨" },
+  { key: "sup_seafood", name: "海鮮直送", contact: "阿志", phone: "02-2809-8888", note: "當日漁獲，需前一天下單" },
+  { key: "sup_grocery", name: "美食物流", contact: "客服", phone: "0800-100-200", note: "乾貨、調味、乳製品，月結 30 天" },
+];
+
+/** Which supplier (by key) seeds each ingredient category. */
+const CATEGORY_SUPPLIER: Record<string, string> = {
+  meat: "sup_meat",
+  seafood: "sup_seafood",
+  vegetable: "sup_market",
+  dairy: "sup_grocery",
+  staple: "sup_grocery",
+  seasoning: "sup_grocery",
+};
 
 export interface SeedMenu {
   key: string;
@@ -189,50 +215,88 @@ export const SEED_MENUS: SeedMenu[] = [
 export interface SeedResult {
   ingredientsAdded: number;
   menusAdded: number;
+  suppliersAdded: number;
 }
 
-export type SeedScope = "ingredients" | "all";
+export type SeedScope = "suppliers" | "ingredients" | "all";
+
+// Deterministic 0..1 noise so the sample data looks the same on every load.
+const noise = (n: number) => {
+  const x = Math.sin(n * 9973) * 10000;
+  return x - Math.floor(x);
+};
+const round100 = (n: number) => Math.round(n / 100) * 100;
 
 /**
- * Load seed data. Idempotent on `seedKey`: ingredients/menus that were already
- * loaded (by key) are skipped, so the button is safe to press more than once.
+ * Load seed data. Idempotent on `seedKey`: suppliers / ingredients / menus that
+ * were already loaded (by key) are skipped, so the button is safe to press more
+ * than once. Operations sample data is only generated when no revenue exists.
  */
 export async function loadSeedData(scope: SeedScope = "all"): Promise<SeedResult> {
   const ts = Date.now();
   let ingredientsAdded = 0;
   let menusAdded = 0;
+  let suppliersAdded = 0;
 
-  await db.transaction("rw", db.ingredients, db.menus, async () => {
-    // Map existing seed ingredients by key so we can resolve recipe references.
-    const existing = await db.ingredients.toArray();
-    const idByKey = new Map<string, number>();
-    for (const ing of existing) {
-      if (ing.seedKey) idByKey.set(ing.seedKey, ing.id!);
-    }
+  await db.transaction(
+    "rw",
+    [db.ingredients, db.menus, db.suppliers, db.purchases, db.revenues],
+    async () => {
+      // --- Suppliers (all scopes) ---
+      const existingSuppliers = await db.suppliers.toArray();
+      const supIdByKey = new Map<string, number>();
+      for (const s of existingSuppliers) {
+        if (s.seedKey) supIdByKey.set(s.seedKey, s.id!);
+      }
+      for (const sup of SEED_SUPPLIERS) {
+        if (supIdByKey.has(sup.key)) continue;
+        const id = await db.suppliers.add({
+          name: sup.name,
+          contact: sup.contact,
+          phone: sup.phone,
+          note: sup.note,
+          seedKey: sup.key,
+          createdAt: ts,
+          updatedAt: ts,
+        });
+        supIdByKey.set(sup.key, id as number);
+        suppliersAdded++;
+      }
 
-    for (const seed of SEED_INGREDIENTS) {
-      if (idByKey.has(seed.key)) continue;
-      const id = await db.ingredients.add({
-        name: seed.name,
-        nameEn: seed.nameEn,
-        unit: seed.unit,
-        unitCost: seed.unitCost,
-        category: seed.category,
-        supplier: seed.supplier,
-        seedKey: seed.key,
-        createdAt: ts,
-        updatedAt: ts,
-      });
-      idByKey.set(seed.key, id as number);
-      ingredientsAdded++;
-    }
+      if (scope === "suppliers") return;
 
-    if (scope === "all") {
+      // --- Ingredients (linked to their category's supplier) ---
+      const existing = await db.ingredients.toArray();
+      const idByKey = new Map<string, number>();
+      for (const ing of existing) {
+        if (ing.seedKey) idByKey.set(ing.seedKey, ing.id!);
+      }
+      for (const seed of SEED_INGREDIENTS) {
+        if (idByKey.has(seed.key)) continue;
+        const supKey = CATEGORY_SUPPLIER[seed.category];
+        const id = await db.ingredients.add({
+          name: seed.name,
+          nameEn: seed.nameEn,
+          unit: seed.unit,
+          unitCost: seed.unitCost,
+          category: seed.category,
+          supplierId: supKey ? supIdByKey.get(supKey) : undefined,
+          supplier: seed.supplier,
+          seedKey: seed.key,
+          createdAt: ts,
+          updatedAt: ts,
+        });
+        idByKey.set(seed.key, id as number);
+        ingredientsAdded++;
+      }
+
+      if (scope !== "all") return;
+
+      // --- Menus ---
       const existingMenus = await db.menus.toArray();
       const menuKeys = new Set(
         existingMenus.map((m) => m.seedKey).filter(Boolean),
       );
-
       for (const menu of SEED_MENUS) {
         if (menuKeys.has(menu.key)) continue;
         const recipe = menu.recipe
@@ -258,8 +322,48 @@ export async function loadSeedData(scope: SeedScope = "all"): Promise<SeedResult
         });
         menusAdded++;
       }
-    }
-  });
 
-  return { ingredientsAdded, menusAdded };
+      // --- Operations sample: ~2 weeks of purchases + revenue ---
+      // Only when there is no revenue yet, to avoid duplicating on re-load.
+      if ((await db.revenues.count()) === 0) {
+        const today = new Date();
+        for (let d = 13; d >= 0; d--) {
+          const day = new Date(today);
+          day.setDate(today.getDate() - d);
+          const date = toISODate(day);
+          const dow = day.getDay();
+          const weekend = dow === 5 || dow === 6 || dow === 0;
+          const base = 22000 + (weekend ? 7000 : 0);
+          const revenue = round100(base * (0.9 + noise(d + 1) * 0.3));
+          await db.revenues.add({ date, revenue, createdAt: ts, updatedAt: ts });
+
+          const addPurchase = async (
+            supKey: string,
+            ingKey: string,
+            frac: number,
+          ) => {
+            const amount = round100(
+              revenue * frac * (0.85 + noise(d * 7 + supKey.length) * 0.3),
+            );
+            if (amount <= 0) return;
+            await db.purchases.add({
+              date,
+              supplierId: supIdByKey.get(supKey),
+              ingredientId: idByKey.get(ingKey),
+              amount,
+              createdAt: ts,
+              updatedAt: ts,
+            });
+          };
+
+          await addPurchase("sup_market", "onion", 0.11);
+          if (d % 2 === 0) await addPurchase("sup_meat", "beef_shank", 0.16);
+          if (d % 2 === 1) await addPurchase("sup_seafood", "shrimp", 0.15);
+          if (d % 7 === 0) await addPurchase("sup_grocery", "olive_oil", 0.1);
+        }
+      }
+    },
+  );
+
+  return { ingredientsAdded, menusAdded, suppliersAdded };
 }

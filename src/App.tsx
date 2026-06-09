@@ -4,6 +4,8 @@ import { SettingsProvider, useSettings } from "@/lib/settings";
 import { AppShell } from "@/components/layout/AppShell";
 import { HomePage } from "@/features/home/HomePage";
 import { IngredientsPage } from "@/features/ingredients/IngredientsPage";
+import { SuppliersPage } from "@/features/suppliers/SuppliersPage";
+import { OperationsPage } from "@/features/operations/OperationsPage";
 import { MenusPage } from "@/features/menus/MenusPage";
 import { OverviewPage } from "@/features/overview/OverviewPage";
 import { SettingsPage } from "@/features/settings/SettingsPage";
@@ -29,6 +31,8 @@ function Shell() {
       <AppShell view={view} onNavigate={setView}>
         {view === "home" && <HomePage onNavigate={setView} />}
         {view === "ingredients" && <IngredientsPage />}
+        {view === "suppliers" && <SuppliersPage />}
+        {view === "operations" && <OperationsPage />}
         {view === "menus" && <MenusPage />}
         {view === "overview" && <OverviewPage />}
         {view === "settings" && <SettingsPage />}

@@ -6,8 +6,10 @@ import {
   Menu as MenuIcon,
   Monitor,
   Moon,
+  Receipt,
   Settings as SettingsIcon,
   Sun,
+  Truck,
   UtensilsCrossed,
   X,
 } from "lucide-react";
@@ -26,6 +28,8 @@ import { cn } from "@/lib/utils";
 const ICONS: Record<View, typeof Home> = {
   home: Home,
   ingredients: Carrot,
+  suppliers: Truck,
+  operations: Receipt,
   menus: UtensilsCrossed,
   overview: ClipboardList,
   settings: SettingsIcon,

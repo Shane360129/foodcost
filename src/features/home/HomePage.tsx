@@ -7,9 +7,11 @@ import {
   Database,
   FileDown,
   Quote,
+  Receipt,
   ShieldCheck,
   Sparkles,
   TrendingUp,
+  Truck,
   Wand2,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -27,8 +29,10 @@ const FEATURES: {
   desc: TranslationKey;
 }[] = [
   { icon: Carrot, title: "home.feature1Title", desc: "home.feature1Desc" },
+  { icon: Truck, title: "home.feature8Title", desc: "home.feature8Desc" },
   { icon: Calculator, title: "home.feature2Title", desc: "home.feature2Desc" },
   { icon: Wand2, title: "home.feature3Title", desc: "home.feature3Desc" },
+  { icon: Receipt, title: "home.feature7Title", desc: "home.feature7Desc" },
   { icon: ClipboardList, title: "home.feature4Title", desc: "home.feature4Desc" },
   { icon: FileDown, title: "home.feature5Title", desc: "home.feature5Desc" },
   { icon: Database, title: "home.feature6Title", desc: "home.feature6Desc" },

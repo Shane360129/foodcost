@@ -17,7 +17,9 @@ export interface Ingredient {
   unit: Unit;
   /** Cost of one `unit` of this ingredient, in the app currency. */
   unitCost: number;
-  /** Free-text supplier / sourcing note. */
+  /** Linked supplier (vendor) id, if any. */
+  supplierId?: number;
+  /** Free-text purchasing note (pack size, price memo, ...). */
   supplier?: string;
   /** Optional grouping bucket (meat, seafood, ...). */
   category?: string;
@@ -52,6 +54,46 @@ export interface MenuItem {
   updatedAt: number;
 }
 
+/** A supplier / vendor you purchase ingredients from. */
+export interface Supplier {
+  id?: number;
+  name: string;
+  /** Contact person. */
+  contact?: string;
+  phone?: string;
+  note?: string;
+  seedKey?: string;
+  createdAt: number;
+  updatedAt: number;
+}
+
+/** A single purchase (goods-in) record. Amount is the money spent. */
+export interface Purchase {
+  id?: number;
+  /** Local date, "YYYY-MM-DD". */
+  date: string;
+  supplierId?: number;
+  /** Which product/ingredient was bought (optional). */
+  ingredientId?: number;
+  /** Total money spent on this line, in the app currency. */
+  amount: number;
+  /** Optional quantity bought, in the ingredient's unit. */
+  quantity?: number;
+  note?: string;
+  createdAt: number;
+  updatedAt: number;
+}
+
+/** One day's takings. Keyed by date (one row per day). */
+export interface DailyRevenue {
+  /** Local date, "YYYY-MM-DD" — primary key. */
+  date: string;
+  revenue: number;
+  note?: string;
+  createdAt: number;
+  updatedAt: number;
+}
+
 /** Key/value store for app settings (theme, language, currency...). */
 export interface MetaRow {
   key: string;
@@ -82,5 +124,8 @@ export interface BackupFile {
   exportedAt: string;
   ingredients: Ingredient[];
   menus: MenuItem[];
+  suppliers?: Supplier[];
+  purchases?: Purchase[];
+  revenues?: DailyRevenue[];
   meta?: MetaRow[];
 }
