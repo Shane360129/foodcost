@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="zh-Hant" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0b0f14" />
+    <meta
+      name="description"
+      content="餐廳菜單成本計算器 — 算清楚一道菜真正的成本、定價與毛利。純前端、本地儲存、零後端。Restaurant Menu Cost Calculator."
+    />
+    <title>餐廳菜單成本計算器 · Menu Cost Calculator</title>
+    <script>
+      // Apply stored theme/language before first paint to avoid a flash.
+      (function () {
+        try {
+          var t = localStorage.getItem("foodcost.theme") || "dark";
+          var prefersDark = window.matchMedia(
+            "(prefers-color-scheme: dark)",
+          ).matches;
+          var dark = t === "dark" || (t === "system" && prefersDark);
+          var root = document.documentElement;
+          root.classList.toggle("dark", dark);
+          root.style.colorScheme = dark ? "dark" : "light";
+          var l = localStorage.getItem("foodcost.lang");
+          root.lang = l === "en" ? "en" : "zh-Hant";
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

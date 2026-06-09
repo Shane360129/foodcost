@@ -1,0 +1,121 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+TC:wght@400;500;700&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /* Light theme (kept available via the theme switcher) */
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 220 25% 12%;
+    --card: 0 0% 100%;
+    --card-foreground: 220 25% 12%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 25% 12%;
+    --primary: 160 84% 33%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 210 20% 96%;
+    --secondary-foreground: 220 25% 16%;
+    --muted: 210 20% 96%;
+    --muted-foreground: 215 16% 40%;
+    --accent: 210 24% 93%;
+    --accent-foreground: 220 25% 16%;
+    --destructive: 0 72% 48%;
+    --destructive-foreground: 0 0% 100%;
+    --success: 152 64% 33%;
+    --success-foreground: 0 0% 100%;
+    --warning: 32 95% 42%;
+    --warning-foreground: 0 0% 100%;
+    --border: 214 20% 88%;
+    --input: 214 20% 85%;
+    --ring: 160 84% 33%;
+    --radius: 0.6rem;
+  }
+
+  /* Dark theme (default) */
+  .dark {
+    --background: 220 22% 7%;
+    --foreground: 210 20% 96%;
+    --card: 220 20% 9%;
+    --card-foreground: 210 20% 96%;
+    --popover: 220 24% 8%;
+    --popover-foreground: 210 20% 96%;
+    --primary: 158 78% 46%;
+    --primary-foreground: 160 60% 7%;
+    --secondary: 215 16% 16%;
+    --secondary-foreground: 210 20% 92%;
+    --muted: 216 16% 14%;
+    --muted-foreground: 216 12% 62%;
+    --accent: 215 16% 19%;
+    --accent-foreground: 210 20% 96%;
+    --destructive: 0 72% 55%;
+    --destructive-foreground: 0 0% 98%;
+    --success: 152 66% 47%;
+    --success-foreground: 152 60% 7%;
+    --warning: 38 96% 58%;
+    --warning-foreground: 38 90% 10%;
+    --border: 216 16% 20%;
+    --input: 216 16% 22%;
+    --ring: 158 78% 46%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "cv11", "ss01";
+    text-rendering: optimizeLegibility;
+  }
+  /* Numbers should align in tables / metrics */
+  .tnum {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+  }
+  ::selection {
+    @apply bg-primary/25;
+  }
+
+  /* Refined scrollbars for the SaaS feel */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--border)) transparent;
+  }
+  *::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  *::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--border));
+    border-radius: 9999px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+  *::-webkit-scrollbar-thumb:hover {
+    background-color: hsl(var(--muted-foreground) / 0.5);
+    background-clip: content-box;
+  }
+}
+
+@layer components {
+  /* Subtle ambient gradient used behind the app shell */
+  .app-aurora {
+    background-image:
+      radial-gradient(
+        60rem 40rem at 100% -10%,
+        hsl(var(--primary) / 0.1),
+        transparent 60%
+      ),
+      radial-gradient(
+        50rem 35rem at -10% 0%,
+        hsl(199 89% 48% / 0.08),
+        transparent 55%
+      );
+  }
+}
