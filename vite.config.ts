@@ -22,8 +22,8 @@ export default defineConfig({
         short_name: "成本計算器",
         description:
           "算清楚一道菜真正的成本、定價與毛利。Restaurant Menu Cost Calculator.",
-        theme_color: "#0b0f14",
-        background_color: "#0b0f14",
+        theme_color: "#18130f",
+        background_color: "#18130f",
         display: "standalone",
         orientation: "any",
         start_url: "./",
