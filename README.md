@@ -63,6 +63,7 @@
 - **進銷控管 Operations** — 逐筆記錄**每日進貨**（日期 · 廠商 · 品項 · 金額）與**當日營業額**；月報表自動算出**進貨成本率**、估算毛利、營收／進貨趨勢圖與各廠商進貨佔比。
 - **匯出 PDF** — A4 菜單成本報表，含 LOGO 區、表頭、表格與頁尾，給合夥人或主廚看。
 - **本地儲存 + 備份** — 全部資料存在瀏覽器的 **IndexedDB**（透過 Dexie）；可匯出／匯入 **JSON 備份**，換電腦不會丟資料。
+- **雲端同步 Cloud sync（選用）** — 串接你自己的免費 **Supabase** 專案，一鍵把整份資料上傳／還原，換電腦自動帶著走（純前端、BYO 金鑰，無 SDK 依賴）。
 - **體驗 UX** — SaaS 工具感、數字 `tabular-nums` 對齊、**預設深色模式（另有大地色系淺色主題：赤陶 × 橄欖 × 沙色）**、**中／英雙語切換**、桌面優先但行動裝置可用、**PWA 可離線**。
 
 ---
@@ -121,6 +122,36 @@ npm run preview
 
 ---
 
+## ☁️ 雲端同步 Cloud Sync（Supabase，選用）
+
+想換電腦自動帶資料？可串接**你自己的免費 Supabase 專案**做雲端快照同步。
+因為本專案是純前端靜態網站（不放任何後端密鑰），採 **BYO（自帶金鑰）** 模式：
+資料存在**你自己的** Supabase，App 只是讀寫你提供的網址與公開金鑰。
+
+**設定（約 2 分鐘）：**
+
+1. 到 [supabase.com](https://supabase.com) 免費註冊並建立一個 Project。
+2. Project → **SQL Editor**，執行：
+
+   ```sql
+   create table if not exists foodcost_snapshots (
+     id text primary key,
+     data jsonb not null,
+     updated_at timestamptz not null default now()
+   );
+   alter table foodcost_snapshots enable row level security;
+   create policy "foodcost anon access" on foodcost_snapshots
+     for all to anon using (true) with check (true);
+   ```
+
+3. Project Settings → **API**，把 **Project URL** 與 **anon public key** 貼進
+   App 的「**設定 → 雲端同步**」。
+4. 用「**上傳到雲端**」把整份資料存成一筆快照；換電腦按「**從雲端還原**」即可。
+
+> **隱私提醒：** anon key 是**公開**金鑰，任何取得你網址、金鑰與「工作區代號」的人都能存取這份資料。請用不易猜的工作區代號；高敏感資料建議改用帶登入（Supabase Auth）的方案。**工作區代號**相同的裝置會共用同一份快照。
+
+---
+
 ## 🛠 技術棧 Tech Stack
 
 | 範疇 | 選用 |
@@ -128,6 +159,7 @@ npm run preview
 | 前端框架 | **React 18 + Vite + TypeScript** |
 | 樣式 / 元件 | **Tailwind CSS** + **shadcn/ui**（Radix UI）+ lucide-react |
 | 本地資料庫 | **Dexie**（IndexedDB ORM）+ dexie-react-hooks（live query） |
+| 雲端同步（選用） | **Supabase**（PostgREST，直接 fetch，無 SDK 依賴；BYO 金鑰） |
 | 表單驗證 | **React Hook Form + Zod** |
 | PDF 匯出 | **jsPDF + html2canvas**（依需求動態載入，不拖累首屏） |
 | 離線 / PWA | **vite-plugin-pwa**（Workbox） |

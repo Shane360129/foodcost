@@ -19,6 +19,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PageHeader } from "@/components/common/PageHeader";
 import { ConfirmDialog } from "@/components/common/ConfirmDialog";
+import { CloudSync } from "./CloudSync";
 import { clearAllData } from "@/lib/db";
 import { loadSeedData } from "@/lib/seed";
 import {
@@ -246,6 +247,9 @@ export function SettingsPage() {
             />
           </CardContent>
         </Card>
+
+        {/* Cloud sync (Supabase) */}
+        <CloudSync />
 
         {/* Danger zone */}
         <Card className="border-destructive/30">
